@@ -3,6 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const entryRoutes = require("./routes/entry.routes");
+const trashRoutes = require("./routes/trash.routes");
 
 //set up server
 const app = express();
@@ -15,12 +16,10 @@ const corsOptions = {
     origin: "http://localhost:3000"
 };
 app.use(cors(corsOptions));
+
+//routes
 app.use("/inventory", entryRoutes, cors(corsOptions));
-
-/*app.get('/', (req, res) => {
-    res.send("hello world");
-})*/
-
+app.use("/trash", trashRoutes, cors(corsOptions))
 
 
 const PORT = process.env.PORT || 8000;

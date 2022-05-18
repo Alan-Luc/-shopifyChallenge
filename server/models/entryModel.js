@@ -5,9 +5,11 @@ const Entry = function(entry) {
     this.stock = entry.stock
     this.packages = entry.packages
     this.orders = entry.orders
-    this.comments = entry.comments
+    this.comments = null
+    this.archived = false
 };
 
+//inventory functions
 Entry.create = (entryObj, callback) => {
     db.query("INSERT INTO inventory SET ?", entryObj,
         (err, res) => {
@@ -21,7 +23,7 @@ Entry.create = (entryObj, callback) => {
 };
 
 Entry.getAll = (callback) => {
-    db.query("SELECT * from inventory WHERE archived = false",
+    db.query("SELECT id, itemName, stock, packages, orders FROM inventory WHERE archived = false",
         (err, res) => {
             if (err) {
                 console.log("error ", err);
@@ -33,7 +35,7 @@ Entry.getAll = (callback) => {
 };
 
 Entry.getById = (id, callback) => {
-    db.query("SELECT * FROM inventory WHERE id = ?", [id],
+    db.query("SELECT id, itemName, stock, packages, orders FROM inventory WHERE id = ?", [id],
         (err, res) => {
             if (err) {
                 console.log("error", err);
@@ -50,8 +52,8 @@ Entry.getById = (id, callback) => {
 
 Entry.update = (id, entryObj, callback) => {
     db.query(
-        "UPDATE inventory SET itemName = ?, stock = ?, packages = ?, orders = ?, comments = ? WHERE id = ?",
-        [entryObj.itemName, entryObj.stock, entryObj.packages, entryObj.orders, entryObj.comments, id],
+        "UPDATE inventory SET itemName = ?, stock = ?, packages = ?, orders = ? WHERE id = ?",
+        [entryObj.itemName, entryObj.stock, entryObj.packages, entryObj.orders, id],
         (err, res) => {
             if(err) {
                 console.log("error", err);
@@ -67,7 +69,7 @@ Entry.update = (id, entryObj, callback) => {
 };
 
 Entry.deleteById = (id, callback) => {
-    db.query("DELETE FROM inventory WHERE id = ?", [id],
+    db.query("DELETE FROM inventory WHERE archived = true AND id = ?", [id],
         (err, res) => {
             if(err) {
                 console.log("error", err);
@@ -82,7 +84,7 @@ Entry.deleteById = (id, callback) => {
 };
 
 Entry.deleteAll = (callback) => {
-    db.query("DELETE FROM inventory",
+    db.query("DELETE FROM inventory WHERE archived = true",
         (err, res) => {
             if(err) {
                 console.log("error", err);
@@ -100,8 +102,9 @@ Entry.deleteAll = (callback) => {
     })
 };
 
-Entry.trash = (id, callback) => {
-    db.query("UPDATE inventory SET archived = true WHERE id = ?", [id], 
+//trash functions
+Entry.trash = (id, comment, callback) => {
+    db.query("UPDATE inventory SET comments = ?, archived = true WHERE id = ?", [comment, id], 
         (err, res) => {
             if(err) {
                 console.log("error", err);
@@ -117,7 +120,7 @@ Entry.trash = (id, callback) => {
 };
 
 Entry.undoTrash = (id, callback) => {
-    db.query("UPDATE inventory SET archived = false WHERE id = ?", [id], 
+    db.query("UPDATE inventory SET comments = null, archived = false WHERE id = ?", [id], 
         (err, res) => {
             if(err) {
                 console.log("error", err);
@@ -130,6 +133,34 @@ Entry.undoTrash = (id, callback) => {
             console.log("entry undeleted", res)
             callback(null, res)
     })
+};
+
+Entry.viewTrash = (callback) => {
+    db.query("SELECT id, itemName, comments FROM inventory WHERE archived = true",
+        (err, res) => {
+            if (err) {
+                console.log("error ", err);
+                return;
+            }
+            console.log(res)
+            callback(null, res)
+    });
+};
+
+Entry.viewTrashById = (id, callback) => {
+    db.query("SELECT id, itemName, comments FROM inventory WHERE archived = true AND id = ?", [id],
+        (err, res) => {
+            if (err) {
+                console.log("error", err);
+                return;
+            }
+            if (res?.length > 0) {
+                console.log(res);
+                callback(null, res[0]);
+                return;
+            }
+            callback({type: "DNE"}, null)
+    });
 };
 
 module.exports = Entry;

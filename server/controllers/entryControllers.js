@@ -1,5 +1,6 @@
 const Entry = require("../models/entryModel");
 
+//inventory controllers
 exports.create = (req, res) => {
     if (!req.body) {
         res.status(400).send({message: "Cannot be empty!"});
@@ -10,7 +11,6 @@ exports.create = (req, res) => {
         stock: req.body.stock,
         packages: req.body.packages,
         orders: req.body.orders,
-        comments: req.body.comments,
     });
 
     Entry.create(entry, (err, callback) => {
@@ -94,8 +94,10 @@ exports.deleteAll = (req, res) => {
     })
 };
 
+//trash route controllers
 exports.trash = (req, res) => {
-    Entry.trash(req.params.id, (err, callback) => {
+    Entry.trash(req.params.id, req.body.comments, (err, callback) => {
+        console.log("comment", req.body.comments)
         if(err) {
             if(err.type === "DNE") {
                 res.status(404).send({
@@ -126,5 +128,28 @@ exports.undoTrash = (req, res) => {
             console.log("entry successfully undeleted!")
             res.send(callback)
         }
+    })
+};
+
+exports.viewTrash = (req, res) => {
+    Entry.viewTrash((err, callback) => {
+        if(err) {
+            res.status(500).send({message: err.message})
+        }
+        else res.send(callback);
+    })
+};
+
+exports.viewTrashById = (req, res) => {
+    Entry.viewTrashById(req.params.id, (err, callback) => {
+        if(err) {
+            if(err.type === "DNE") {
+                res.status(404).send({
+                    message: `entry with id ${req.params.id} does not exist`
+                })
+            }
+            else res.status(500).send({message: err.message})
+        }
+        else res.send(callback)
     })
 };

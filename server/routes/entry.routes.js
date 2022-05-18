@@ -11,10 +11,4 @@ router.put("/:id", entry.update);
 
 router.patch("/:id", entry.trash);
 
-router.patch("/undo/:id", entry.undoTrash);
-
-router.delete("/:id", entry.deleteById);
-
-router.delete("/", entry.deleteAll);
-
 module.exports = router;

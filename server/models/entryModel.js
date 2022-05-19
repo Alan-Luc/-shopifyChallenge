@@ -41,7 +41,7 @@ Entry.getById = (id, callback) => {
                 console.log("error", err);
                 return;
             }
-            if (res?.length > 0) {
+            if (res.length > 0) {
                 console.log(res);
                 callback(null, res[0]);
                 return;

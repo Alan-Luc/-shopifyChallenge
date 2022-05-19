@@ -35,7 +35,7 @@ Entry.getAll = (callback) => {
 };
 
 Entry.getById = (id, callback) => {
-    db.query("SELECT id, itemName, stock, packages, orders FROM inventory WHERE id = ?", [id],
+    db.query("SELECT id, itemName, stock, packages, orders FROM inventory WHERE archived = false and id = ?", [id],
         (err, res) => {
             if (err) {
                 console.log("error", err);
